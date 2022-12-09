@@ -1,8 +1,10 @@
 import './css/styles.css';
+import { renderArticles } from './js/renderArticles';
 import ArticlesApiService from './js/articles-api-service';
 import LoadMoreBtn from './js/components/load-more-btn';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
-import debounce from 'lodash.debounce';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const searchForm = document.querySelector('.search-form');
 const gallary = document.querySelector('.gallery');
@@ -12,6 +14,7 @@ const loadMoreBtn = new LoadMoreBtn({
   hidden: true,
 });
 const articlesApiService = new ArticlesApiService();
+const lightbox = new SimpleLightbox('.gallery a', { captionDelay: 250 });
 
 searchForm.addEventListener('submit', onSearch);
 loadMoreBtn.refs.button.addEventListener('click', fetchArticles);
@@ -45,6 +48,8 @@ function fetchArticles() {
         return;
       }
       appendArticlesMarkup(data);
+      onPageScrolling();
+      lightbox.refresh();
 
       if (gallary.children.length === data.totalHits) {
         Notify.info(
@@ -62,31 +67,16 @@ function fetchArticles() {
 function appendArticlesMarkup(hits) {
   gallary.insertAdjacentHTML('beforeend', renderArticles(hits));
 }
-function renderArticles({ hits }) {
-  return hits
-    .map(hit => {
-      return `<div class="photo-card">
-      <a class="gallary-link" href=${hit.largeImageURL}>
-    <img class ="gallary-image"src="${hit.webformatURL}" alt="${hit.tags}" loading="lazy" /></a>
-    <div class="info">
-      <p class="info-item">
-        <b>Likes: </b></br>${hit.likes}
-      </p>
-      <p class="info-item">
-        <b>Views: </b></br>${hit.views}
-      </p>
-      <p class="info-item">
-        <b>Comments: </b></br>${hit.comments}
-      </p>
-      <p class="info-item">
-        <b>Downloads: </b></br>${hit.downloads}
-      </p>
-    </div>
-  </div>
-    `;
-    })
-    .join('');
-}
+
 function clearArticlesContainer() {
   gallary.innerHTML = '';
+}
+
+function onPageScrolling() {
+  const { height: cardHeight } =
+    gallary.firstElementChild.getBoundingClientRect();
+  window.scrollBy({
+    top: cardHeight * 2,
+    behavior: 'smooth',
+  });
 }
