@@ -14,6 +14,7 @@ const loadMoreBtn = new LoadMoreBtn({
   hidden: true,
 });
 const articlesApiService = new ArticlesApiService();
+
 const lightbox = new SimpleLightbox('.gallery a', { captionDelay: 250 });
 
 searchForm.addEventListener('submit', onSearch);
@@ -32,7 +33,6 @@ function onSearch(event) {
   loadMoreBtn.show();
   // При зміні пошуку та сабміті форми робимо пошук з 1 сторінки
   articlesApiService.resetPage();
-
   fetchArticles();
 }
 
