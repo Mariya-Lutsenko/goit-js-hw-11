@@ -1,26 +1,31 @@
+import axios from 'axios';
+
 const API_KEY = '31909701-b05a4a73718479a7bf524b9e0';
-const BASE_URL = 'https://pixabay.com/api/';
+const PARAMETERS =
+  'per_page=40&orientation=horizontal&image_type=photo&safesearch=true';
+axios.defaults.baseURL = 'https://pixabay.com/api';
 
 export default class ArticlesApiService {
   constructor() {
     this.searchQuery = '';
     this.page = 1;
   }
-  fetchArticles() {
-    // console.log(this);
-
-    // повертаємо проміс
-    return fetch(
-      `${BASE_URL}?key=${API_KEY}&q=${this.searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&${this.page}=1&per_page=40`
-    )
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        this.incrementPage();
-        // дані у data, у консолі прийшов масив hits з об'єктами
-        return data.hits;
-      });
+  async fetchArticles() {
+    try {
+      const response = await axios.get(
+        `/?key=${API_KEY}&q=${this.searchQuery}&page=${this.page}&${PARAMETERS}`
+      );
+      const data = await response.data;
+      this.incrementPage();
+      console.log(data);
+      console.log(data.total);
+      console.log({ data });
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
   }
+
   //   Після запиту збільшуємо сторінку на 1
   incrementPage() {
     this.page += 1;

@@ -1,51 +1,73 @@
 import './css/styles.css';
-// import articlesTpl from './templates/articles.hbs';
 import ArticlesApiService from './js/articles-api-service';
+import LoadMoreBtn from './js/components/load-more-btn';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
+import debounce from 'lodash.debounce';
 
 const searchForm = document.querySelector('.search-form');
 const gallary = document.querySelector('.gallery');
-const loadMoreBtn = document.querySelector('[data-action="load-more"]');
 
+const loadMoreBtn = new LoadMoreBtn({
+  selector: '[data-action="load-more"]',
+  hidden: true,
+});
 const articlesApiService = new ArticlesApiService();
 
 searchForm.addEventListener('submit', onSearch);
-loadMoreBtn.addEventListener('click', onLoadMore);
+loadMoreBtn.refs.button.addEventListener('click', fetchArticles);
 
 function onSearch(event) {
   event.preventDefault();
-  //очищуємо контейнер з картками при новому запиті
-  clearArticlesContainer();
   // Забираємо термін для пошуку у set
   articlesApiService.query =
     event.currentTarget.elements.searchQuery.value.trim();
   if (articlesApiService.query === '') {
-    return alert('немає даних');
+    return Notify.info(`Enter a word to search for images.`);
   }
+  loadMoreBtn.show();
   // При зміні пошуку та сабміті форми робимо пошук з 1 сторінки
   articlesApiService.resetPage();
-  // then повертає масив об'єктів hits і передає їх у функцію сворення розмітки appendArticlesMarkup
-  articlesApiService.fetchArticles().then(hits => {
-    //очищуємо контейнер з картками при новому запиті і додаємо нові картки
-    clearArticlesContainer();
-    appendArticlesMarkup(hits);
-  });
+  //очищуємо контейнер з картками при новому запиті і додаємо нові картки
+  clearArticlesContainer();
+  fetchArticles();
 }
 
-function onLoadMore() {
-  // викликаємо метод пошуку даних та виводимо картки
-  articlesApiService.fetchArticles().then(appendArticlesMarkup);
+function fetchArticles() {
+  loadMoreBtn.disable();
+  articlesApiService
+    .fetchArticles()
+    .then(data => {
+      if (data.total === 0) {
+        Notify.info(
+          `Sorry, there are no images matching your search query: ${articlesApiService.query}. Please try again.`
+        );
+        loadMoreBtn.hide();
+        return;
+      }
+      appendArticlesMarkup(data);
+
+      if (gallary.children.length === data.totalHits) {
+        Notify.info(
+          `We're sorry, but you've reached the end of search results.`
+        );
+        loadMoreBtn.hide();
+      } else {
+        loadMoreBtn.enable();
+        Notify.success(`Hooray! We found ${data.totalHits} images.`);
+      }
+    })
+    .catch(error => console.log(error));
 }
-// додаємо картку до gallary
+
 function appendArticlesMarkup(hits) {
   gallary.insertAdjacentHTML('beforeend', renderArticles(hits));
 }
-
-// рендерим картку, у функцію приходить масив об'єктів
-function renderArticles(hits) {
+function renderArticles({ hits }) {
   return hits
     .map(hit => {
       return `<div class="photo-card">
-    <img src="${hit.webformatURL}" alt="${hit.tags}" loading="lazy" />
+      <a class="gallary-link" href=${hit.largeImageURL}>
+    <img class ="gallary-image"src="${hit.webformatURL}" alt="${hit.tags}" loading="lazy" /></a>
     <div class="info">
       <p class="info-item">
         <b>Likes: </b></br>${hit.likes}
@@ -68,9 +90,3 @@ function renderArticles(hits) {
 function clearArticlesContainer() {
   gallary.innerHTML = '';
 }
-
-// const options = {
-//   headers: {
-//     key: '31909701-b05a4a73718479a7bf524b9e0',
-//   },
-// };
