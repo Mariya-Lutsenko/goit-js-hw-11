@@ -21,6 +21,8 @@ loadMoreBtn.refs.button.addEventListener('click', fetchArticles);
 
 function onSearch(event) {
   event.preventDefault();
+  //очищуємо контейнер з картками при новому запиті і додаємо нові картки
+  clearArticlesContainer();
   // Забираємо термін для пошуку у set
   articlesApiService.query =
     event.currentTarget.elements.searchQuery.value.trim();
@@ -30,8 +32,7 @@ function onSearch(event) {
   loadMoreBtn.show();
   // При зміні пошуку та сабміті форми робимо пошук з 1 сторінки
   articlesApiService.resetPage();
-  //очищуємо контейнер з картками при новому запиті і додаємо нові картки
-  clearArticlesContainer();
+
   fetchArticles();
 }
 
@@ -72,6 +73,7 @@ function clearArticlesContainer() {
   gallary.innerHTML = '';
 }
 
+// Плавна прокрутка сторінки після запиту і рендера кожної наступної групи зображень
 function onPageScrolling() {
   const { height: cardHeight } =
     gallary.firstElementChild.getBoundingClientRect();
