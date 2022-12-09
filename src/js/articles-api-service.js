@@ -17,9 +17,6 @@ export default class ArticlesApiService {
       );
       const data = await response.data;
       this.incrementPage();
-      console.log(data);
-      console.log(data.total);
-      console.log({ data });
       return data;
     } catch (error) {
       console.log(error);
