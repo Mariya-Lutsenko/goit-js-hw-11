@@ -129,9 +129,12 @@ img {
     4px 1px 14px 5px rgba(0, 0, 0, 0);
   box-shadow: 0px 10px 13px -7px #000000, 4px 1px 14px 5px rgba(0, 0, 0, 0);
 }
+.gallary-image {
+  transition: transform 500ms linear;
+}
 
 .gallary-image:hover {
-  transform: scale(1.2);
+  transform: scale(1.1);
 }
 .info {
   display: flex;
