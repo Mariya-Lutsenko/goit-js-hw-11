@@ -36,7 +36,7 @@ function onSearch(event) {
   fetchArticles();
 }
 
-async function fetchArticles() {
+function fetchArticles() {
   loadMoreBtn.disable();
   articlesApiService
     .fetchArticles()
