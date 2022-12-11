@@ -36,7 +36,7 @@ function onSearch(event) {
   fetchArticles();
 }
 
-function fetchArticles() {
+async function fetchArticles() {
   loadMoreBtn.disable();
   articlesApiService
     .fetchArticles()
@@ -62,7 +62,7 @@ function fetchArticles() {
         Notify.success(`Hooray! We found ${data.totalHits} images.`);
       }
     })
-    .catch(error => console.log(error));
+    .catch(error => Notify.info(`Error`));
 }
 
 function appendArticlesMarkup(hits) {
