@@ -36,34 +36,62 @@ function onSearch(event) {
   fetchArticles();
 }
 
-function fetchArticles() {
+async function fetchArticles() {
   loadMoreBtn.disable();
-  articlesApiService
-    .fetchArticles()
-    .then(data => {
-      if (data.total === 0) {
-        Notify.info(
-          `Sorry, there are no images matching your search query: ${articlesApiService.query}. Please try again.`
-        );
-        loadMoreBtn.hide();
-        return;
-      }
-      appendArticlesMarkup(data);
-      onPageScrolling();
-      lightbox.refresh();
+  try {
+    const data = await articlesApiService.fetchArticles();
 
-      if (gallary.children.length === data.totalHits) {
-        Notify.info(
-          `We're sorry, but you've reached the end of search results.`
-        );
-        loadMoreBtn.hide();
-      } else {
-        loadMoreBtn.enable();
-        Notify.success(`Hooray! We found ${data.totalHits} images.`);
-      }
-    })
-    .catch(error => Notify.info(`Error`));
+    if (data.total === 0) {
+      Notify.info(
+        `Sorry, there are no images matching your search query: ${articlesApiService.query}. Please try again.`
+      );
+      loadMoreBtn.hide();
+      return;
+    }
+    appendArticlesMarkup(data);
+    onPageScrolling();
+    lightbox.refresh();
+
+    if (gallary.children.length === data.totalHits) {
+      Notify.info(`We're sorry, but you've reached the end of search results.`);
+      loadMoreBtn.hide();
+    } else {
+      loadMoreBtn.enable();
+      Notify.success(`Hooray! We found ${data.totalHits} images.`);
+    }
+  } catch (error) {
+    Notify.info(`Error`);
+  }
 }
+
+// function fetchArticles() {
+//   loadMoreBtn.disable();
+//   articlesApiService
+//     .fetchArticles()
+//     .then(data => {
+//       if (data.total === 0) {
+//         Notify.info(
+//           `Sorry, there are no images matching your search query: ${articlesApiService.query}. Please try again.`
+//         );
+//         loadMoreBtn.hide();
+//         return;
+//       }
+//       appendArticlesMarkup(data);
+//       onPageScrolling();
+//       lightbox.refresh();
+
+//       if (gallary.children.length === data.totalHits) {
+//         Notify.info(
+//           `We're sorry, but you've reached the end of search results.`
+//         );
+//         loadMoreBtn.hide();
+//       } else {
+//         loadMoreBtn.enable();
+//         Notify.success(`Hooray! We found ${data.totalHits} images.`);
+//       }
+//     })
+//     .catch(error => Notify.info(`Error`));
+// }
 
 function appendArticlesMarkup(hits) {
   gallary.insertAdjacentHTML('beforeend', renderArticles(hits));
